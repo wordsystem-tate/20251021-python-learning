@@ -1,0 +1,42 @@
+import cv2
+from PyQt5.QtWidgets import QLabel,QApplication,QWidget,QVBoxLayout
+from PyQt5.QtGui import QImage,QPixmap
+import sys
+
+class VideoWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("カメラビュー")
+        self.resize(640,600)
+        
+        #カメラ映像表示用ラベル
+        self.video_label=QLabel()
+        self.video_label.setFixedSize(640,600)
+        self.pers_inf=QLabel("")
+        self.pers_inf.setStyleSheet("font-size:16px;color:red;")
+        
+        #レイアウトに追加
+        layout=QVBoxLayout()
+        layout.addWidget(self.video_label)
+        layout.addWidget(self.pers_inf)
+        self.setLayout(layout)
+        
+        #カメラ起動
+        self.cap=cv2.VideoCapture(0)
+        
+        #映像更新用タイマー
+        self.video_timer=self.startTimer(30)
+        
+def timerEvent(self,event):
+    if event.timeId()==self.video_timer:
+        ret,frame=self.cap.read()
+        if ret:
+            rgb=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+            h,w,ch=rgb.shape
+            img=QImage(rgb.data,w,h,ch * w,QImage.Format_RGB888)
+            self.video_label.setPixmap(QPixmap.fromImage(img))
+            
+app=QApplication(sys.argv)
+win=VideoWindow()
+win.show()
+sys.exit(app.exec_())    
